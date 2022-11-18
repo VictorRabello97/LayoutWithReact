@@ -10,15 +10,15 @@ export function Post({author, publishedAt, content}){
         'Post muito bacana!'
     ])
 
-    const [newCommentText, setNewCommentText] = useState('')
+const [newCommentText, setNewCommentText] = useState('')
 
-    const publishedDateFormated = new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    }).format(publishedAt)
+const publishedDateFormated = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+}).format(publishedAt)
 
-    function handleCreateNewComment(){
+function handleCreateNewComment(){
         event.preventDefault();
         setComments([...comments, newCommentText])
         setNewCommentText('')
@@ -27,11 +27,29 @@ export function Post({author, publishedAt, content}){
 
 function handleNewCommentChange(){
     setNewCommentText(event.target.value)
-
+    event.target.setCustomValidity('')
+    
 }
 
 
-    return (
+function deleteComment(commentToDelete){ //deletando comentários
+    const commentsWithoutOneComment = comments.filter(comment => {
+        return comment !== commentToDelete
+
+    })
+
+
+    setComments(commentsWithoutOneComment);
+
+}
+
+function handleNewCommentInvalid(){ // validando se o campo está preenchido
+    event.target.setCustomValidity('Esse campo é obrigatório!')
+}
+
+const isNewCommentEmpty = newCommentText.length === 0
+
+return (
         <article className={styles.post}>
 
             <header>
@@ -53,9 +71,10 @@ function handleNewCommentChange(){
             <div className={styles.content}>
                {content.map(line => {
                 if (line.type ==='paragraph'){
-                    return <p>{line.content}</p>
+                    return <p key={line.content} >{line.content}</p>
+
                 } else if (line.type === 'link'){
-                    return <p> <a href="">{line.content}</a></p>
+                    return <p key={line.content} > <a href="">{line.content}</a></p>
                 }
                     
                })}
@@ -71,16 +90,23 @@ function handleNewCommentChange(){
                 placeholder="Deixe um Comentario"
                 value={newCommentText}
                 onChange={handleNewCommentChange}
+                onInvalid={handleNewCommentInvalid}
+                required
                 />
 
                 <footer>
-                    <button type="submit" > Publicar </button>
+                    <button type="submit" 
+                    disabled={isNewCommentEmpty} 
+                    > Publicar </button>
                 </footer>
             </form>
 
             <div className={styles.commentList}>
                 {comments.map(comment => {
-                    return <Comment content={comment}/>
+                    return (
+                    <Comment key={comment} 
+                    content={comment} 
+                    deleteComment={deleteComment} />)
                 })}
                 
 
